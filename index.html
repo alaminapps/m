@@ -8,9 +8,15 @@
     <meta name="theme-color" content="#4f46e5">
     <meta name="apple-mobile-web-app-capable" content="yes">
     
+    <!-- Fonts & External Libraries -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- Flatpickr (Premium Calendar) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     
     <style>
         :root { 
@@ -140,6 +146,24 @@
         .btn-outline { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
         .btn-outline:hover { background: var(--input-bg); }
         
+        /* DYNAMIC FLATPICKR CALENDAR STYLING */
+        .flatpickr-calendar { background: var(--card-bg) !important; border: 1px solid var(--border-color) !important; box-shadow: var(--shadow-float) !important; font-family: 'Poppins', sans-serif !important; color: var(--text-main) !important;}
+        .flatpickr-day { color: var(--text-main) !important; }
+        .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus, .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover, .flatpickr-day.selected.prevMonthDay, .flatpickr-day.startRange.prevMonthDay, .flatpickr-day.endRange.prevMonthDay, .flatpickr-day.selected.nextMonthDay, .flatpickr-day.startRange.nextMonthDay, .flatpickr-day.endRange.nextMonthDay { background: var(--primary-color) !important; border-color: var(--primary-color) !important; color: #fff !important; }
+        .flatpickr-day:hover, .flatpickr-day.prevMonthDay:hover, .flatpickr-day.nextMonthDay:hover, .flatpickr-day:focus, .flatpickr-day.prevMonthDay:focus, .flatpickr-day.nextMonthDay:focus { background: var(--input-bg) !important; color: var(--text-main) !important;}
+        .flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover { color: var(--text-muted) !important; }
+        .flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { color: var(--text-muted) !important; }
+        .flatpickr-month { fill: var(--text-main) !important; color: var(--text-main) !important; }
+        .flatpickr-current-month .flatpickr-monthDropdown-months { background: var(--card-bg) !important; color: var(--text-main) !important; }
+        .flatpickr-current-month input.cur-year { color: var(--text-main) !important; }
+        .flatpickr-prev-month svg, .flatpickr-next-month svg { fill: var(--text-main) !important; }
+        .flatpickr-prev-month:hover svg, .flatpickr-next-month:hover svg { fill: var(--primary-color) !important; }
+        span.flatpickr-weekday { color: var(--primary-color) !important; font-weight: 800 !important; text-transform: uppercase !important; font-size: 11px !important; letter-spacing: 1px; }
+        .flatpickr-weekdays { border-bottom: 1px dashed var(--border-color) !important; margin-bottom: 5px !important; padding-bottom: 5px !important;}
+        .flatpickr-time { border-top: 1px dashed var(--border-color) !important; }
+        .flatpickr-time input, .flatpickr-time .flatpickr-time-separator, .flatpickr-time .flatpickr-am-pm { color: var(--text-main) !important; }
+        .flatpickr-time input:hover, .flatpickr-time .flatpickr-am-pm:hover, .flatpickr-time input:focus, .flatpickr-time .flatpickr-am-pm:focus { background: var(--input-bg) !important; color: var(--text-main) !important;}
+
         /* 3-Block Summary Bar */
         .filter-wrapper { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px; }
         .filter-container { display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 5px; margin-bottom: 15px;}
@@ -178,7 +202,9 @@
         .badge-pending { background: var(--warning-light); color: var(--warning-color); }
         .strat-badge { font-size: 10px; background: rgba(139, 92, 246, 0.15); color: #a78bfa; padding: 2px 8px; border-radius: 6px; font-weight: 600; margin-left: 8px;}
         
-        .note-text { font-size: 12px; color: var(--text-muted); display: block; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; font-style: italic;}
+        /* ✨ UPDATE: note-text allow wrapping for long notes ✨ */
+        .note-text { font-size: 12px; color: var(--text-muted); display: block; margin-top: 6px; font-style: italic; white-space: normal; word-wrap: break-word; line-height: 1.4;}
+        
         .action-btn { width: auto; padding: 6px 12px; font-size: 10px; border-radius: 6px; cursor: pointer; margin-right: 6px; margin-top: 6px; font-weight: 700;}
         .date-text { font-size: 13px; font-weight: 600; color: var(--text-main); white-space: nowrap;}
         .time-text { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
@@ -228,15 +254,16 @@
         </div>
         <div class="header-actions">
             <button class="install-btn" id="installBtn" onclick="installApp()">Install App</button>
-            <button class="theme-toggle" id="themeIcon" onclick="toggleTheme()">🌙</button>
+            <button class="theme-toggle" title="Change PIN" onclick="changePin()">⚙️</button>
+            <button class="theme-toggle" id="themeIcon" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
         </div>
     </header>
 
     <div class="container" id="mainApp">
         <div id="loadingText" class="loading">🔄 Syncing Network Securely...</div>
 
-        <!-- 💼 OVERVIEW -->
-        <h2 class="section-heading">Financial Overview</h2>
+        <!-- Financial Overview Section -->
+        <h2 class="section-heading">🏦 Financial Overview</h2>
         <div class="grid-3">
             <div class="card balance-card">
                 <span style="font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Current Balance</span>
@@ -261,10 +288,11 @@
             </div>
         </div>
 
-        <!-- ⚡ ACTION DESK -->
-        <h2 class="section-heading">Action Center Tools</h2>
+        <!-- Action Center Section -->
+        <h2 class="section-heading">⚡ Action Center Tools</h2>
         <div class="grid-action">
-            <!-- Place Bet Full Width -->
+            
+            <!-- Card 1: Place New Bet -->
             <div class="card primary-action-card">
                 <h3 style="margin-bottom:20px; font-size: 18px;">🎯 Place New Bet</h3>
                 <div class="flex-row">
@@ -280,26 +308,36 @@
                         <label>Strategy Tag</label>
                         <select id="strategy"><option value="Pre-Match">Pre-Match</option><option value="Live Bet">Live Bet</option><option value="Tipster">Tipster</option><option value="Accumulator">Accumulator</option></select>
                     </div>
-                    <div class="input-group" style="flex:2;"><label>Match Notes / Memo</label><input type="text" id="betNote" placeholder="e.g. BD vs IND, Kohli 50+"></div>
+                    <!-- ✨ PREMIUM FLATPICKR FIELD -->
+                    <div class="input-group">
+                        <label>📅 Date & Time (Optional)</label>
+                        <input type="text" id="betDate" placeholder="Current Date & Time" style="cursor: pointer; background: var(--input-bg);" onclick="this.showPicker()">
+                    </div>
                     <div class="input-group">
                         <label>Status</label>
                         <select id="result"><option value="pending">⏳ Pending</option><option value="win">🏆 Win</option><option value="loss">❌ Loss</option></select>
                     </div>
                 </div>
-                <button class="btn-primary" style="margin-top: 10px;" onclick="placeBet()">Save Bet Record</button>
+                <div class="input-group" style="margin-top: -5px;"><label>Match Notes / Memo</label><input type="text" id="betNote" placeholder="e.g. BD vs IND, Kohli 50+"></div>
+                <button class="btn-primary" style="margin-top: 5px;" onclick="placeBet()">Save Bet Record</button>
             </div>
 
-            <!-- Wallet -->
+            <!-- Card 2: Wallet Flow -->
             <div class="card">
                 <h3>💳 Wallet Flow</h3>
-                <div class="input-group" style="margin-bottom:25px;"><label>Transfer Amount</label><input type="number" id="fundAmount" placeholder="Enter amount"></div>
+                <div class="input-group"><label>Transfer Amount</label><input type="number" id="fundAmount" placeholder="Enter amount"></div>
+                <!-- ✨ PREMIUM FLATPICKR FIELD -->
+                <div class="input-group" style="margin-bottom:25px;">
+                    <label>📅 Date & Time (Optional)</label>
+                    <input type="text" id="fundDate" placeholder="Current Date & Time" style="cursor: pointer; background: var(--input-bg);" onclick="this.showPicker()">
+                </div>
                 <div style="display:flex; flex-direction:column; gap:12px; margin-top:auto;">
                     <button class="btn-success" onclick="manageFunds('Deposit')">Deposit Funds</button>
                     <button class="btn-outline" onclick="manageFunds('Withdraw')">Withdraw Funds</button>
                 </div>
             </div>
             
-            <!-- ⚡ Sharp Edge Value Scanner -->
+            <!-- Card 3: Sharp Edge Scanner -->
             <div class="card">
                 <h3>⚡ Sharp Edge Scanner (+EV)</h3>
                 <div class="flex-row">
@@ -320,8 +358,22 @@
                     <div class="analyzer-row"><span style="color:var(--text-muted);">Action / Stake:</span> <strong id="recStakeText">-</strong></div>
                 </div>
             </div>
+            
+            <!-- Card 4: Hedging Engine -->
+            <div class="card">
+                <h3>🛡️ Hedging (Profit Lock)</h3>
+                <div class="flex-row">
+                    <div class="input-group"><label>Initial Bet Stake</label><input type="number" id="initStake" placeholder="e.g. 1000"></div>
+                    <div class="input-group"><label>Initial Odds</label><input type="number" id="initOdds" placeholder="e.g. 2.00"></div>
+                </div>
+                <div class="input-group"><label style="color:var(--warning-color);">Current Live Odds (Opposite Side)</label><input type="number" id="liveOdds" placeholder="e.g. 1.30" oninput="calcHedge()"></div>
+                <div class="analyzer-box">
+                    <div class="analyzer-row"><span style="color:var(--text-muted);">Required Hedge Stake:</span> <strong id="hedgeStakeRes">৳ 0</strong></div>
+                    <div class="analyzer-row"><span style="color:var(--text-muted);">Guaranteed Net Profit:</span> <strong id="hedgeProfitRes" style="color:var(--success-color);">৳ 0</strong></div>
+                </div>
+            </div>
 
-            <!-- ⚖️ 1X2 Analyzer -->
+            <!-- Card 5: 1X2 Market Analyzer -->
             <div class="card">
                 <h3>⚖️ 1X2 Market Maker</h3>
                 <div class="flex-row">
@@ -337,7 +389,7 @@
                 </div>
             </div>
 
-            <!-- ⚽ NEW: Auto-Prob Engine (Poisson) -->
+            <!-- Card 6: Poisson Distribution Engine -->
             <div class="card">
                 <h3>⚽ Auto-Prob Engine (xG)</h3>
                 <div class="flex-row">
@@ -362,9 +414,8 @@
             </div>
         </div>
 
-        <!-- 📊 PRO ANALYTICS -->
-        <h2 class="section-heading" style="margin-top: 40px;">Performance Analytics</h2>
-        
+        <!-- Performance Analytics Dashboard -->
+        <h2 class="section-heading" style="margin-top: 40px;">📈 Performance Analytics</h2>
         <div class="grid-3" style="margin-bottom: 24px;">
             <div class="card">
                 <h3 style="margin-bottom: 5px;">Consistency Heatmap</h3>
@@ -405,9 +456,8 @@
             <div class="stat-card"><h4>Total Lost</h4><div class="stat-number" id="totalLost" style="color: var(--danger-color);">৳ 0</div></div>
         </div>
 
-        <!-- 📋 LOG WITH PRO SUMMARY BAR -->
-        <h2 class="section-heading" style="margin-top: 40px;">Ledger & History</h2>
-        
+        <!-- Ledger & Filters section -->
+        <h2 class="section-heading" style="margin-top: 40px;">📋 Ledger & History</h2>
         <div class="filter-wrapper">
             <div class="filter-container">
                 <button id="filter-All" class="filter-btn active" onclick="applyFilter('All')">All Records</button>
@@ -420,18 +470,18 @@
             </div>
             
             <div class="date-filter-group">
-                <div class="date-pill">
-                    <span>From</span><input type="date" id="startDate" onchange="applyDateFilter()">
+                <div class="date-pill" style="cursor: pointer;">
+                    <span>📅 From</span><input type="text" id="startDate" placeholder="Select Date" style="cursor: pointer; background: transparent;" onclick="this.showPicker()">
                 </div>
-                <div class="date-pill">
-                    <span>To</span><input type="date" id="endDate" onchange="applyDateFilter()">
+                <div class="date-pill" style="cursor: pointer;">
+                    <span>📅 To</span><input type="text" id="endDate" placeholder="Select Date" style="cursor: pointer; background: transparent;" onclick="this.showPicker()">
                 </div>
                 <button class="btn-outline" style="width: auto; padding: 6px 14px; font-size: 11px; border-radius: 100px; height: 32px;" onclick="clearDateFilter()">Reset Dates</button>
                 <button class="btn-primary" style="width: auto; padding: 6px 14px; font-size: 11px; border-radius: 100px; height: 32px; box-shadow: none;" onclick="exportCSV()">Download CSV</button>
             </div>
         </div>
 
-        <!-- Professional 3-Block Summary Bar -->
+        <!-- Top Overview Summary Blocks -->
         <div class="summary-bar" id="summaryBar" style="display: none;">
             <div class="summary-item">
                 <div class="sum-icon">📊</div>
@@ -449,7 +499,7 @@
             </div>
         </div>
 
-        <!-- Unified Seamless Table -->
+        <!-- Enclosed Fluid Table -->
         <div class="table-container">
             <div class="table-responsive">
                 <table id="dataTable">
@@ -465,7 +515,7 @@
     </div>
 
     <script>
-        // PWA Setup
+        // PWA Configuration Setup
         const manifestStr = `{"name":"BetTrack VIP","short_name":"BetTrack","start_url":".","display":"standalone","background_color":"#09090b","theme_color":"#4f46e5","icons":[{"src":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSI4MCIgZm9udC1zaXplPSI4MCI+8J+SjjwvdGV4dD48L3N2Zz4=","sizes":"192x192","type":"image/svg+xml"}]}`;
         const blob = new Blob([manifestStr], {type: 'application/json'});
         document.getElementById('dynamic-manifest').setAttribute('href', URL.createObjectURL(blob));
@@ -485,14 +535,20 @@
             }
         }
 
-        // 🔴 API URL
+        // 🔴 Google Sheet Apps Script API URL
         const API_URL = "https://script.google.com/macros/s/AKfycbzq6Uy6iGAOIjsQw4NYR_crNQzsdEAvSbzRni1SJbbAAKqiZiXwW9Yp3q0DXHU_l5ob/exec";
 
         let globalHistory = [], currentFilter = 'All';
         let currentStartDate = null, currentEndDate = null;
         let myTrendChart = null, myMonthlyChart = null, myDoughnutChart = null;
 
-        // Security & Theme
+        // ✨ Initialize Flatpickr
+        const fpBet = flatpickr("#betDate", { enableTime: true, altInput: true, altFormat: "d M, Y - h:i K", dateFormat: "Y-m-d H:i" });
+        const fpFund = flatpickr("#fundDate", { enableTime: true, altInput: true, altFormat: "d M, Y - h:i K", dateFormat: "Y-m-d H:i" });
+        const fpStart = flatpickr("#startDate", { altInput: true, altFormat: "d M, Y", dateFormat: "Y-m-d", onChange: applyDateFilter });
+        const fpEnd = flatpickr("#endDate", { altInput: true, altFormat: "d M, Y", dateFormat: "Y-m-d", onChange: applyDateFilter });
+
+        // Security Vault Setup
         let savedPin = localStorage.getItem('betTrackPin'), pinInput = document.getElementById('pinInput'), pinMsg = document.getElementById('pinMsg');
         if(!savedPin) document.getElementById('pinInstruction').innerText = "Create 4-digit PIN";
         pinInput.addEventListener('keypress', e => { if(e.key==='Enter') verifyPin(); });
@@ -501,6 +557,22 @@
             if(pinInput.value.length !== 4) return pinMsg.innerText = "Must be 4 digits!";
             if(!savedPin) { localStorage.setItem('betTrackPin', pinInput.value); savedPin = pinInput.value; unlockApp(); } 
             else { if(pinInput.value === savedPin) unlockApp(); else { pinMsg.innerText = "Incorrect PIN!"; pinInput.value = ""; } }
+        }
+
+        function changePin() {
+            let current = prompt("Enter current 4-digit PIN:");
+            if (current === savedPin) {
+                let newP = prompt("Enter NEW 4-digit PIN:");
+                if (newP && newP.length === 4 && !isNaN(newP)) {
+                    localStorage.setItem('betTrackPin', newP);
+                    savedPin = newP;
+                    alert("PIN Changed Successfully!");
+                } else {
+                    alert("Invalid format! Must be 4 numeric digits.");
+                }
+            } else if (current !== null) {
+                alert("Incorrect current PIN!");
+            }
         }
 
         function unlockApp() { document.getElementById('pinOverlay').style.display = 'none'; document.getElementById('mainApp').style.display = 'block'; loadTheme(); loadData(); }
@@ -512,7 +584,7 @@
             if(globalHistory.length > 0) applyFilter(currentFilter);
         }
         function loadTheme() {
-            let t = localStorage.getItem('betTrackTheme') || 'dark'; // Defaulting to dark for premium feel
+            let t = localStorage.getItem('betTrackTheme') || 'dark';
             document.documentElement.setAttribute('data-theme', t);
             document.getElementById('themeIcon').innerText = t === 'light' ? '🌙' : '☀️';
         }
@@ -525,14 +597,26 @@
             (function frame() { confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, zIndex: 9999 }); confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, zIndex: 9999 }); if (Date.now() < end) requestAnimationFrame(frame); }());
         }
 
-        function setTarget() { let amt = prompt("Profit Target (Tk):"); if(amt && !isNaN(amt)) { localStorage.setItem('betTrackTarget', amt); updateTargetUI(); } }
-        function updateTargetUI(cur = 0) {
-            let tgt = parseFloat(localStorage.getItem('betTrackTarget')) || 0;
-            document.getElementById('targetGoal').innerText = "Goal: ৳" + tgt; document.getElementById('targetAchieved').innerText = "Achieved: ৳" + Math.max(0, cur).toFixed(0);
-            document.getElementById('targetBar').style.width = tgt > 0 ? Math.min(100, Math.max(0, (cur/tgt)*100)) + "%" : "0%";
+        function setTarget() { 
+            let amt = prompt("Set Profit Target (Tk):"); 
+            if(amt && !isNaN(amt)) { 
+                localStorage.setItem('betTrackTarget', amt); 
+                let rawNet = document.getElementById('netCashPL').innerText.replace(/,/g, '');
+                let currentNet = parseFloat(rawNet.replace('+', '')) || 0;
+                if (rawNet.includes('-')) currentNet = -Math.abs(parseFloat(rawNet.replace('-', '')));
+                updateTargetUI(currentNet); 
+            } 
         }
 
-        // ⚡ Sharp Edge Scanner 
+        function updateTargetUI(cur = 0) {
+            let tgt = parseFloat(localStorage.getItem('betTrackTarget')) || 0;
+            document.getElementById('targetGoal').innerText = "Goal: ৳" + tgt; 
+            document.getElementById('targetAchieved').innerText = "Achieved: ৳" + Math.max(0, cur).toFixed(0);
+            let percentage = 0;
+            if (tgt > 0 && cur > 0) percentage = Math.min(100, (cur / tgt) * 100);
+            document.getElementById('targetBar').style.width = percentage + "%";
+        }
+
         function scanValue() {
             let pOdds = parseFloat(document.getElementById('pinOdds').value);
             let lOdds = parseFloat(document.getElementById('localOdds').value);
@@ -543,7 +627,7 @@
             let probText = document.getElementById('trueProbText');
             let stakeText = document.getElementById('recStakeText');
 
-            if(!pOdds || !lOdds || !bal) {
+            if(!pOdds || !lOdds || !bal || bal <= 0) {
                 resBox.style.borderColor = "transparent"; evText.innerText = "0%"; probText.innerText = "0%"; stakeText.innerText = "-";
                 return;
             }
@@ -560,7 +644,7 @@
                 resBox.style.borderColor = "var(--success-color)";
 
                 let f = ((lOdds - 1) * trueProb - (1 - trueProb)) / (lOdds - 1);
-                let stake = f * bal * 0.3; 
+                let stake = Math.max(0, f * bal * 0.15); 
                 stakeText.innerText = "৳ " + stake.toFixed(0) + " (Bet Safe)";
                 stakeText.style.color = "var(--success-color)";
             } else {
@@ -572,7 +656,30 @@
             }
         }
 
-        // ⚖️ 1X2 Market Analyzer Logic
+        function calcHedge() {
+            let stake = parseFloat(document.getElementById('initStake').value);
+            let iOdds = parseFloat(document.getElementById('initOdds').value);
+            let lOdds = parseFloat(document.getElementById('liveOdds').value);
+            
+            if(!stake || !iOdds || !lOdds) return;
+            
+            let hedgeAmount = (stake * iOdds) / lOdds;
+            let profit = (stake * iOdds) - stake - hedgeAmount;
+            
+            let hText = document.getElementById('hedgeStakeRes');
+            let pText = document.getElementById('hedgeProfitRes');
+
+            hText.innerText = "৳ " + hedgeAmount.toFixed(0);
+            
+            if (profit > 0) {
+                pText.innerText = "৳ " + profit.toFixed(0);
+                pText.style.color = "var(--success-color)";
+            } else {
+                pText.innerText = "-৳ " + Math.abs(profit).toFixed(0) + " (Loss Lock)";
+                pText.style.color = "var(--danger-color)";
+            }
+        }
+
         function calc1X2() {
             let o1 = parseFloat(document.getElementById('calc1').value);
             let ox = parseFloat(document.getElementById('calcX').value);
@@ -601,7 +708,6 @@
             t1Res.innerText = true1.toFixed(1) + "%"; txRes.innerText = trueX.toFixed(1) + "%"; t2Res.innerText = true2.toFixed(1) + "%";
         }
 
-        // ⚽ NEW: Auto-Prob Engine (Poisson Math)
         function getFactorial(num) {
             if (num === 0 || num === 1) return 1;
             for (let i = num - 1; i >= 1; i--) { num *= i; }
@@ -617,12 +723,9 @@
             let axG = parseFloat(document.getElementById('awayXG').value);
             
             if(!hxG || !axG) {
-                document.getElementById('over25Res').innerText = "0%";
-                document.getElementById('under25Res').innerText = "0%";
-                document.getElementById('mostLikelyScore').innerText = "-";
-                document.getElementById('p1Res').innerText = "0%";
-                document.getElementById('pxRes').innerText = "0%";
-                document.getElementById('p2Res').innerText = "0%";
+                document.getElementById('over25Res').innerText = "0%"; document.getElementById('under25Res').innerText = "0%";
+                document.getElementById('mostLikelyScore').innerText = "-"; document.getElementById('p1Res').innerText = "0%";
+                document.getElementById('pxRes').innerText = "0%"; document.getElementById('p2Res').innerText = "0%";
                 return;
             }
 
@@ -638,14 +741,8 @@
             for(let h=0; h<=6; h++) {
                 for(let a=0; a<=6; a++) {
                     let p = homeProb[h] * awayProb[a];
-                    
-                    if(h+a > 2.5) probOver25 += p;
-                    else probUnder25 += p;
-
-                    if(h > a) prob1 += p;
-                    else if(h === a) probX += p;
-                    else prob2 += p;
-
+                    if(h+a > 2.5) probOver25 += p; else probUnder25 += p;
+                    if(h > a) prob1 += p; else if(h === a) probX += p; else prob2 += p;
                     exactScores.push({score: `${h}-${a}`, prob: p});
                 }
             }
@@ -655,12 +752,10 @@
             document.getElementById('over25Res').innerText = (probOver25 * 100).toFixed(1) + "%";
             document.getElementById('under25Res').innerText = (probUnder25 * 100).toFixed(1) + "%";
             document.getElementById('mostLikelyScore').innerText = exactScores[0].score + " (" + (exactScores[0].prob * 100).toFixed(1) + "%)";
-            
             document.getElementById('p1Res').innerText = (prob1 * 100).toFixed(1) + "%";
             document.getElementById('pxRes').innerText = (probX * 100).toFixed(1) + "%";
             document.getElementById('p2Res').innerText = (prob2 * 100).toFixed(1) + "%";
         }
-
 
         async function loadData() {
             document.getElementById('loadingText').style.display = 'block';
@@ -689,11 +784,13 @@
                 let dayKey = dateObj.toISOString().split('T')[0]; 
                 let monthKey = dateObj.toLocaleString('en-US', { month: 'short', year: '2-digit' }); 
                 
+                let chartDate = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); 
+                
                 if(!dailyPL[dayKey]) dailyPL[dayKey] = 0;
                 if(!monthlyPL[monthKey]) monthlyPL[monthKey] = 0;
 
-                if (item.type === "Deposit") { dep += amt; bal += amt; rBal += amt; tL.push(""); tD.push(rBal); } 
-                else if (item.type === "Withdraw") { wd += amt; bal -= amt; rBal -= amt; tL.push(""); tD.push(rBal); } 
+                if (item.type === "Deposit") { dep += amt; bal += amt; rBal += amt; tL.push(chartDate); tD.push(rBal); } 
+                else if (item.type === "Withdraw") { wd += amt; bal -= amt; rBal -= amt; tL.push(chartDate); tD.push(rBal); } 
                 else if (item.type === "Bet") {
                     inv += amt; bal -= amt; rBal -= amt; 
                     if(!stratStats[strat]) stratStats[strat] = 0;
@@ -708,7 +805,8 @@
                         dailyPL[dayKey] -= amt; monthlyPL[monthKey] -= amt;
                         if (amt > maxL) maxL = amt; 
                     } else { pendingAmt += amt; }
-                    tL.push(""); tD.push(rBal);
+                    
+                    tL.push(chartDate); tD.push(rBal);
                 }
                 
                 if (rBal > peakBal) peakBal = rBal;
@@ -750,12 +848,13 @@
             updateDoughnutChart((netB>0?netB:0), lost, pendingAmt);
             
             let step = Math.ceil(tD.length / 60);
-            updateLineChart(tL.filter((_, i) => i%step===0 || i===tL.length-1), tD.filter((_, i) => i%step===0 || i===tD.length-1));
+            if (tL.length > 0 && tD.length > 0) {
+                 updateLineChart(tL.filter((_, i) => i%step===0 || i===tL.length-1), tD.filter((_, i) => i%step===0 || i===tD.length-1));
+            }
 
             globalHistory = hist.reverse(); applyFilter(currentFilter);
         }
 
-        // Charts System
         function renderHeatmap(dailyData) {
             let container = document.getElementById('heatmapGrid'); if(!container) return; container.innerHTML = '';
             let today = new Date();
@@ -785,7 +884,52 @@
             let el = document.getElementById('trendChart'); if(!el) return;
             let ctx = el.getContext('2d'); if(myTrendChart) myTrendChart.destroy();
             let gc = document.documentElement.getAttribute('data-theme') === 'dark' ? '#27272a' : '#e4e4e7';
-            myTrendChart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'Bal', data: data, borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.15)', borderWidth: 3, pointRadius: 0, fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: getChartCol() }, grid: { color: gc, drawBorder: false } } } } });
+            
+            myTrendChart = new Chart(ctx, { 
+                type: 'line', 
+                data: { 
+                    labels: labels, 
+                    datasets: [{ 
+                        label: 'Balance', 
+                        data: data, 
+                        borderColor: '#4f46e5', 
+                        backgroundColor: 'rgba(79, 70, 229, 0.15)', 
+                        borderWidth: 3, 
+                        pointRadius: 4, 
+                        pointHoverRadius: 7, 
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#ffffff', 
+                        pointBorderWidth: 2,
+                        fill: true, 
+                        tension: 0.4 
+                    }] 
+                }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return '৳ ' + context.parsed.y.toLocaleString('en-IN'); 
+                                }
+                            }
+                        }
+                    }, 
+                    scales: { 
+                        x: { 
+                            display: true, 
+                            ticks: { color: getChartCol(), maxTicksLimit: 7 }, 
+                            grid: { display: false } 
+                        }, 
+                        y: { 
+                            ticks: { color: getChartCol() }, 
+                            grid: { color: gc, drawBorder: false } 
+                        } 
+                    } 
+                } 
+            });
         }
 
         function updateMonthlyChart(monthlyData) {
@@ -796,7 +940,6 @@
             myMonthlyChart = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: getChartCol(), font:{size:10} }, grid: { display: false } }, y: { ticks: { color: getChartCol() }, grid: { display: false } } } } });
         }
 
-        // Filters & UI
         function applyDateFilter() {
             currentStartDate = document.getElementById('startDate').value;
             currentEndDate = document.getElementById('endDate').value;
@@ -804,9 +947,9 @@
         }
 
         function clearDateFilter() {
-            document.getElementById('startDate').value = '';
-            document.getElementById('endDate').value = '';
-            currentStartDate = null;
+            fpStart.clear();
+            fpEnd.clear();
+            currentStartDate = null; 
             currentEndDate = null;
             applyFilter(currentFilter);
         }
@@ -854,7 +997,15 @@
             history.forEach(i => {
                 let amt = parseFloat(i.amount) || 0; sumAmount += amt;
                 let dS = "-", tS = "";
-                if(i.id && !isNaN(i.id)) { let d = new Date(Number(i.id)); dS = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }); tS = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); }
+                
+                if(i.id && !isNaN(i.id)) { 
+                    let d = new Date(Number(i.id)); 
+                    let day = String(d.getDate()).padStart(2, '0');
+                    let month = String(d.getMonth() + 1).padStart(2, '0');
+                    let year = d.getFullYear();
+                    dS = `${day}-${month}-${year}`; 
+                    tS = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); 
+                }
 
                 let sH = "", tI = "", oH = "-"; 
                 
@@ -862,22 +1013,32 @@
                     tI = i.type === "Deposit" ? "⬇️" : "⬆️"; 
                     sH = `<span class="badge ${i.type === 'Deposit' ? 'badge-win' : 'badge-pending'}">${i.type}</span>`; 
                     sumNetPL += (i.type === "Deposit" ? amt : -amt);
-                    t.innerHTML += `<tr><td><span class="date-text">${dS}</span><span class="time-text">${tS}</span></td><td><div style="display:flex; align-items:center;"><span class="type-icon">${tI}</span><div><strong class="amt-text">৳ ${amt.toLocaleString('en-IN')}</strong><br><span style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Wallet Flow</span></div></div></td><td>-</td><td>${sH}</td></tr>`;
+                    t.innerHTML += `<tr><td><span class="date-text">${dS}</span><span class="time-text">${tS}</span></td><td><div style="display:flex; align-items:center;"><span class="type-icon">${tI}</span><div><strong class="amt-text">৳ ${amt.toLocaleString('en-IN')}</strong><br><span style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Wallet Flow</span></div></div></td><td>-</td><td>${sH}</td></tr>`;
                 } else {
-                    tI = "🎲";
-                    let aO = 1, cat = "Other", note = "", strat = "";
+                    let aO = 1, cat = "Other", note = "", strat = "Standard";
                     let raw = i.odds ? i.odds.toString() : "1";
-                    let p = raw.split('|||'); if(p.length > 1){ aO = parseFloat(p[0]); cat = p[1]; note = p[2]||""; strat = p[3]||""; } else { aO = parseFloat(raw); }
+                    let p = raw.split('|||'); 
+                    if(p.length > 1){ aO = parseFloat(p[0]); cat = p[1]; note = p[2]||""; strat = p[3]||"Standard"; } 
+                    else { aO = parseFloat(raw); }
+
+                    // Category Logic
+                    if (cat === "Football") { tI = "⚽"; } 
+                    else if (cat === "Cricket") { tI = "🏏"; } 
+                    else if (cat === "Casino") { tI = "🎰"; } 
+                    else { tI = "🎲"; }
 
                     let ret = (amt * aO).toFixed(2);
                     oH = `<span style="font-weight: 800; font-size:14px; font-family:'Space Grotesk', sans-serif;">${aO}</span> <span class="strat-badge">${strat||cat}</span><div class="ret-text">Ret: ৳ ${Number(ret).toLocaleString('en-IN')}</div>`;
                     let nH = note ? `<div class="note-text">${note}</div>` : '';
+                    
+                    // ✨ Category Name Tag
+                    let catTag = `<span style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">${cat} BET</span>`;
 
                     if (i.result === "win") { sH = `<span class="badge badge-win">WIN</span>`; sumNetPL += (amt*aO)-amt; } 
                     else if (i.result === "loss") { sH = `<span class="badge badge-loss">LOSS</span>`; sumNetPL -= amt; }
                     else sH = `<span class="badge badge-pending">PENDING</span><div style="margin-top:6px; display:flex; gap:4px;"><button class="action-btn btn-success" onclick="resolveBet('${i.id}', 'win')">W</button><button class="action-btn btn-danger" onclick="resolveBet('${i.id}', 'loss')">L</button></div>`; 
 
-                    t.innerHTML += `<tr><td><span class="date-text">${dS}</span><span class="time-text">${tS}</span></td><td><div style="display:flex; align-items:center;"><span class="type-icon">${tI}</span><div><strong class="amt-text">৳ ${amt.toLocaleString('en-IN')}</strong>${nH}</div></div></td><td>${oH}</td><td>${sH}</td></tr>`;
+                    t.innerHTML += `<tr><td><span class="date-text">${dS}</span><span class="time-text">${tS}</span></td><td><div style="display:flex; align-items:center;"><span class="type-icon">${tI}</span><div><strong class="amt-text">৳ ${amt.toLocaleString('en-IN')}</strong><br>${catTag}${nH}</div></div></td><td>${oH}</td><td>${sH}</td></tr>`;
                 }
             });
 
@@ -899,7 +1060,14 @@
         function manageFunds(type) {
             let a = parseFloat(document.getElementById('fundAmount').value), cb = parseFloat(document.getElementById('currentBalance').innerText.replace(/,/g, ''));
             if(!a || a <= 0) return; if(type === 'Withdraw' && a > cb) return alert("Insufficient Balance");
-            sendData({ action: "add", type: type, amount: a, id: new Date().getTime() }); document.getElementById('fundAmount').value = '';
+
+            let customDate = document.getElementById('fundDate').value;
+            let timestamp = customDate ? new Date(customDate).getTime() : new Date().getTime();
+
+            sendData({ action: "add", type: type, amount: a, id: timestamp }); 
+            
+            document.getElementById('fundAmount').value = '';
+            fpFund.clear(); 
         }
 
         function placeBet() {
@@ -908,10 +1076,16 @@
             let c = document.getElementById('category').value, s = document.getElementById('strategy').value, r = document.getElementById('result').value, n = document.getElementById('betNote').value || "";
             if(a > parseFloat(document.getElementById('currentBalance').innerText.replace(/,/g, ''))) return alert("Insufficient Balance");
 
+            let customDate = document.getElementById('betDate').value;
+            let timestamp = customDate ? new Date(customDate).getTime() : new Date().getTime();
+
             if(r === 'win') { shootConfetti(); playWinSound(); }
             let combo = o + "|||" + c + "|||" + n + "|||" + s;
-            sendData({ action: "add", type: "Bet", amount: a, odds: combo, result: r, id: new Date().getTime() });
-            document.getElementById('betAmount').value = ''; document.getElementById('odds').value = ''; document.getElementById('betNote').value = '';
+            sendData({ action: "add", type: "Bet", amount: a, odds: combo, result: r, id: timestamp });
+            
+            document.getElementById('betAmount').value = ''; document.getElementById('odds').value = ''; 
+            document.getElementById('betNote').value = ''; 
+            fpBet.clear(); 
         }
 
         function resolveBet(id, r) { if(confirm(`Confirm ${r.toUpperCase()}?`)) { if(r === 'win') { shootConfetti(); playWinSound(); } setTimeout(() => { sendData({ action: "update", id: id, result: r }); }, 500); } }
